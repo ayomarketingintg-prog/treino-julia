@@ -641,10 +641,10 @@ function renderProgress(){
 // Cada nova avaliação entra como um novo item nesta lista (a mais recente por último).
 const AVALIACOES = [
  {data:"2026-11-04", idade:26, altura:1.52, peso:57.7,
-  dobras:{peitoral:14, axilar:12, tricipital:8, subescapular:32, abdominal:24, suprailiaca:10, coxa:28, bicipital:14},
+  dobras:{peitoral:14, axilar:12, tricipital:8, subescapular:32, abdominal:24, suprailiaca:10, coxa:28},
   perim:{ombro:100, bracoD:26, bracoE:25, antebraco:22, abdomen:80, cintura:73, quadril:96, coxaD:59, coxaE:58, pantD:34, pantE:35.5}},
 ];
-const DOBRAS = [["peitoral","Peitoral"],["axilar","Axilar média"],["tricipital","Tricipital"],["subescapular","Subescapular"],["abdominal","Abdominal"],["suprailiaca","Supra-ilíaca"],["coxa","Coxa"],["bicipital","Bicipital *"]];
+const DOBRAS = [["peitoral","Peitoral"],["axilar","Axilar média"],["tricipital","Tricipital"],["subescapular","Subescapular"],["abdominal","Abdominal"],["suprailiaca","Supra-ilíaca"],["coxa","Coxa"]];
 const PERIM = [["ombro","Ombro"],["bracoD","Braço D"],["bracoE","Braço E"],["antebraco","Antebraço"],["abdomen","Abdômen"],["cintura","Cintura"],["quadril","Quadril"],["coxaD","Coxa D"],["coxaE","Coxa E"],["pantD","Panturrilha D"],["pantE","Panturrilha E"]];
 const JP7 = ["peitoral","axilar","tricipital","subescapular","abdominal","suprailiaca","coxa"];
 
@@ -721,8 +721,7 @@ function renderAvaliacao(){
     </div>
     <section class="card"><div class="chead"><h3>Dobras cutâneas</h3><span>mm</span></div>
       <div class="tscroll"><table class="etable"><tr><th>Dobra</th>${cols}</tr>${rowsFor(DOBRAS,"dobras")}
-      <tr><td><b>Soma 7 dobras</b></td>${AVALIACOES.map(x=>`<td class="num"><b>${calcAval(x).soma}</b></td>`).join("")}${n>1?`<td class="num">${c.soma-p.soma>0?"+":""}${c.soma-p.soma}</td>`:""}</tr></table></div>
-      <div class="gbody" style="padding-top:0"><p style="font-size:12.5px;color:var(--mute)">* Bicipital é medida complementar e não entra na equação.</p></div></section>
+      <tr><td><b>Soma 7 dobras</b></td>${AVALIACOES.map(x=>`<td class="num"><b>${calcAval(x).soma}</b></td>`).join("")}${n>1?`<td class="num">${c.soma-p.soma>0?"+":""}${c.soma-p.soma}</td>`:""}</tr></table></div></section>
     <section class="card"><div class="chead"><h3>Perímetros</h3><span>cm</span></div>
       <div class="tscroll"><table class="etable"><tr><th>Medida</th>${cols}</tr>${rowsFor(PERIM,"perim")}</table></div></section>
     <div class="nexteval">Próxima avaliação sugerida: <b>${next}</b>, ao fim do ciclo de 4 semanas. Mesmo horário, em jejum de treino, com as mesmas medidas.</div>
@@ -897,8 +896,8 @@ $("#savecard").onclick = async ()=>{
       return;
     }
   }catch(err){ if(err && err.name==="AbortError"){ st.textContent="Compartilhamento cancelado."; return; } }
-  const url=URL.createObjectURL(blob); const a=document.createElement("a");
-  a.href=url; a.download=lastCard.fname; document.body.appendChild(a); a.click(); a.remove();
+  const url=URL.createObjectURL(blob); const el=document.createElement("a");
+  el.href=url; el.download=lastCard.fname; document.body.appendChild(el); el.click(); el.remove();
   setTimeout(()=>URL.revokeObjectURL(url),4000);
   st.textContent="Imagem baixada. Se não aparecer, toque e segure a imagem acima para salvar.";
 };
