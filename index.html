@@ -345,8 +345,8 @@ footer{color:var(--mute);font-size:12.5px;padding-block:6px 30px}
       <button type="button" data-style="light" aria-pressed="false">Claro</button>
     </div></div>
     <div class="fields">
-      <label>Distância (km)<input id="f-dist" inputmode="decimal" placeholder="ex.: 4,2" autocomplete="off"></label>
-      <label>Tempo de corrida<input id="f-time" inputmode="numeric" placeholder="ex.: 30:15" autocomplete="off"></label>
+      <label>Distância (km)<input id="f-dist" type="text" inputmode="text" enterkeyhint="next" placeholder="ex.: 5,5" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <label>Tempo de corrida<input id="f-time" type="text" inputmode="numeric" enterkeyhint="done" placeholder="ex.: 30:15 ou 3015" autocomplete="off" spellcheck="false"></label>
       <label class="full">Frase (opcional)<input id="f-quote" maxlength="40" placeholder="ex.: Mais um passo rumo aos 31 min" autocomplete="off"></label>
     </div>
     <div class="actions">
@@ -788,8 +788,20 @@ $("#tstop").onclick=()=>{ clearInterval(tInt); $("#timer").hidden=true; };
 /* ---------- imagem estilo Strava ---------- */
 let cardStyle = store.get("jb-style","clear");
 
-function parseTime(t){ const p=String(t).trim().split(":").map(x=>parseInt(x,10)); if(!p.length||p.some(isNaN)) return null;
+function parseTime(t){
+  t=String(t).trim().replace(/[.,;h'm ]+/g,":").replace(/:+$/,"");
+  if(!t) return null;
+  if(/^\d+$/.test(t)){            // só números: 3015 -> 30:15 · 13015 -> 1:30:15 · 30 -> 30 min
+    if(t.length<=2) return parseInt(t,10)*60;
+    const sec=parseInt(t.slice(-2),10), rest=t.slice(0,-2);
+    const min = rest.length>2 ? parseInt(rest.slice(-2),10) : parseInt(rest,10);
+    const hr = rest.length>2 ? parseInt(rest.slice(0,-2),10) : 0;
+    if(sec>59) return null; return hr*3600+min*60+sec; }
+  const p=t.split(":").map(x=>parseInt(x,10)); if(p.some(isNaN)) return null;
   return p.length===3? p[0]*3600+p[1]*60+p[2] : p.length===2? p[0]*60+p[1] : p[0]*60; }
+function parseDist(v){
+  v=String(v).toLowerCase().replace(/km/g,"").replace(/\s/g,"").replace(",",".");
+  const n=parseFloat(v); return isFinite(n)&&n>0&&n<200 ? n : 0; }
 function fmtSec(s){ s=Math.round(s); const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60; return h? `${h}:${String(m).padStart(2,"0")}:${String(x).padStart(2,"0")}` : `${m}:${String(x).padStart(2,"0")}`; }
 
 function cardData(){
@@ -812,7 +824,7 @@ function cardData(){
   else if(ranTick||full) items.push(["Corrida", runDesc.replace(/^Corrida /,"")]);
   if(exDone||full) items.push(["Musculação", `${d.ex.length} exercícios · ${full?exTot:exDone} séries`]);
   if(coreTot && (coreDone||full)) items.push(["Core", `${d.core.length} exercícios · ${full?coreTot:coreDone} séries`]);
-  const dist = parseFloat(String($("#f-dist").value).replace(",",".")); const secs=parseTime($("#f-time").value);
+  const dist = parseDist($("#f-dist").value); const secs=parseTime($("#f-time").value);
   const stats=[];
   if(dist>0) stats.push(["Distância", `${String(dist.toFixed(2)).replace(/\.?0+$/,"").replace(".",",")} km`]);
   if(secs) stats.push(["Tempo", fmtSec(secs)]);
